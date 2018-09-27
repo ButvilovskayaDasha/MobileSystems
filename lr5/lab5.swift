@@ -2,21 +2,21 @@ import Foundation
 
 print("Task 1: ")
 enum Seasons: String {
-        case twelveMonth = "December"
+        case twelfthMonth = "December"
         case firstMonth = "January"
         case secondMonth = "February"
     
         case thirdMonth = "March"
         case fourthMonth = "April"
-        case fivesMonth = "May"
+        case fifthMonth = "May"
     
-        case sixMonth = "June"
-        case sevenMonth = "July"
-        case eightMonth = "August"
+        case sixthMonth = "June"
+        case seventhMonth = "July"
+        case eighthMonth = "August"
     
-        case nineMonth = "September"
-        case tenMonth = "October"
-        case elevenMonth = "November"
+        case ninthMonth = "September"
+        case tenthMonth = "October"
+        case eleventhMonth = "November"
     
 
     func seasonByMonth() {
