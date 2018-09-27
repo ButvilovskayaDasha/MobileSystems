@@ -72,34 +72,52 @@ print(expr.evaluate())
 
 print("Task 2: ")
 
-enum bugPriority: String {
-    case critical = "Critical"
-    case major = "Major"
-    case minor = "Minor"
-    default: minor
-}
+class Enums {
+    enum Priority {
+        case critical
+        case major
+        case minor
+        case veryLow
+    }
 
-enum currentState: String {
-    case initial = "Open" 
-    case inProgress = "In Progress"
-    case fixed = "Fixed"
-    case wontFix = "Won\'t fix"
+    enum Status {
+        case open
+        case inProgress
+        case fixed
+        case wontFix
+        case closed
+    }
+
+    func setDefaultPriority() -> Priority {
+        return .critical
+    }
+
+    func setDefaultStatus() -> Status {
+        return .open
+    }
 }
 
 class Bug {
+    let enums = Enums()
+    var priority: Enums.Priority
+    var status: Enums.Status
+
     var pid: Int = 0
     var description: String = ""
     var steps = [String?] ()
     var reporter: String = ""
-    //var date: date = new Date(timeIntervalSinceReferenceDate: -123456789.0)
-    var priority: bugPriority
+    var date: Date
     var assignee: String = ""
-    //var status: currentState
     var fixVersion: String? = nil
+
+    init() {
+        self.priority = self.enums.setDefaultPriority()
+        self.status = self.enums.setDefaultStatus()
+        self.date = Date()
+    }
 }
 
-var classInstance = Bug()
+var bug1 = Bug()
 
-var pid = classInstance.pid
-
-print(pid)
+print(bug1.pid)
+print(bug1.date)
