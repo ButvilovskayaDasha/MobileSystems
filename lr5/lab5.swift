@@ -32,7 +32,7 @@ enum Seasons: String {
     }
 }
 
-Seasons.elevenMonth.seasonByMonth();
+Seasons.eleventhMonth.seasonByMonth();
 
 enum ArithmeticExpression { 
     case number(Double)
