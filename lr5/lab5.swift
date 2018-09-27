@@ -73,19 +73,29 @@ print(expr.evaluate())
 print("Task 2: ")
 
 class Enums {
+    enum Severity {
+        case high
+        case medium
+        case low
+    }
+
     enum Priority {
         case critical
         case major
         case minor
-        case veryLow
+        case blocker
     }
 
     enum Status {
         case open
         case inProgress
-        case fixed
-        case wontFix
+        case resolved
+        case reopened
         case closed
+    }
+
+    func setDefaultSeverity() -> Severity {
+        return .high
     }
 
     func setDefaultPriority() -> Priority {
@@ -97,13 +107,16 @@ class Enums {
     }
 }
 
+var storedId: Int = 0 
+
 class Bug {
     let enums = Enums()
+    var severity: Enums.Severity
     var priority: Enums.Priority
     var status: Enums.Status
 
-    var pid: Int = 0
-    var description: String = ""
+    var ID: Int = storedId
+    var summary: String = ""
     var steps = [String?] ()
     var reporter: String = ""
     var date: Date
@@ -111,13 +124,16 @@ class Bug {
     var fixVersion: String? = nil
 
     init() {
+        self.severity = self.enums.setDefaultSeverity()
         self.priority = self.enums.setDefaultPriority()
         self.status = self.enums.setDefaultStatus()
+        storedId += 1
         self.date = Date()
     }
 }
 
+var bug = Bug()
 var bug1 = Bug()
 
-print(bug1.pid)
-print(bug1.date)
+print(bug.ID)
+print(bug1.ID)
