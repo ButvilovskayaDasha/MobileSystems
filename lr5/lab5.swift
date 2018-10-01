@@ -1,6 +1,7 @@
 import Foundation
 
 print("Task 1: ")
+
 enum Seasons: String {
         case twelfthMonth = "December"
         case firstMonth = "January"
@@ -67,7 +68,9 @@ enum ArithmeticExpression {
         }
     } 
 } 
-var expr = ArithmeticExpression.power( .number(2),   .multiplication( .number(1), .number(3) ) )
+
+var expr = ArithmeticExpression.power( .number(2), .multiplication( .number(1), .number(3) ) )
+
 print(expr.evaluate())
 
 print("Task 2: ")
@@ -113,11 +116,24 @@ class Bug {
     let enums = Enums()
     var severity: Enums.Severity
     var priority: Enums.Priority
-    var status: Enums.Status
+    var status: Enums.Status {
+        willSet (newValue) {
+            print("Status: \(self.status) will set instead of \(newValue)")
+        }
+        didSet (oldValue) {
+            print("Status: \(oldValue) did set instead of \(self.status)")
+        }
+    }
+
+    static var nextUid = 0
+    static func generateUid() -> Int {
+        nextUid += 1
+        return nextUid
+    }
 
     var ID: Int = storedId
-    var summary: String = ""
-    var steps = [String?] ()
+    lazy  var summary = String()
+    var steps: [String]?
     var reporter: String = ""
     var date: Date
     var assignee: String = ""
@@ -127,8 +143,50 @@ class Bug {
         self.severity = self.enums.setDefaultSeverity()
         self.priority = self.enums.setDefaultPriority()
         self.status = self.enums.setDefaultStatus()
-        storedId += 1
+        self.ID = Bug.generateUid()
         self.date = Date()
+    }
+
+    convenience init(summary: String, steps: [String], reporter: String,
+     severity: Enums.Severity, priority: Enums.Priority, status: Enums.Status,
+     assignee: String,  fixVersion: String) {
+        self.init()
+        self.summary = summary
+        self.steps = steps
+        self.reporter = reporter
+        self.severity = severity
+        self.priority = priority
+        self.status = status
+        self.assignee = assignee
+        self.fixVersion = fixVersion
+    }
+    
+    convenience init?(fixVersion: String?) {
+        self.init()
+        self.fixVersion = fixVersion
+        if(self.fixVersion == "10.0") {
+            return nil
+        }
+    }
+
+    func setSeverity(_ severity: Enums.Severity) {
+        self.severity = severity
+    }
+
+    func setPriority(_ priority: Enums.Priority) {
+        self.priority = priority
+    }
+
+    func setStatus(_ status: Enums.Status) {
+        self.status = status
+    }
+
+    func setAssignee(_ assignee: String) {
+        self.assignee = assignee
+    }
+
+    subscript(number: Int)-> String{
+        return self.steps![number]
     }
 }
 
@@ -137,3 +195,44 @@ var bug1 = Bug()
 
 print(bug.ID)
 print(bug1.ID)
+
+print(bug.priority)
+bug.setPriority(Enums.Priority.minor)
+print(bug.priority)
+
+print(bug.status)
+bug.setStatus(Enums.Status.resolved)
+print(bug.status)
+
+class SpecialBug : Bug {
+    var time: TimeInterval?
+    
+    override init(){
+        super.init()
+    }
+
+    convenience init(summary: String, steps: [String], reporter: String,
+     severity: Enums.Severity, priority: Enums.Priority, status: Enums.Status,
+     assignee: String,  fixVersion: String, time: TimeInterval) {
+        self.init()
+        self.summary = summary
+        self.steps = steps
+        self.reporter = reporter
+        self.severity = severity
+        self.priority = priority
+        self.status = status
+        self.assignee = assignee
+        self.fixVersion = fixVersion
+        self.time = time
+    }
+}
+
+var bugs : [Any] = []
+bugs.append(Bug())
+bugs.append(Bug(summary: "summary", steps: ["step1", "step2"], reporter: "reporter", severity: Enums.Severity.low, priority: Enums.Priority.major, status: Enums.Status.inProgress, assignee: "assignee", fixVersion: "1.0"))
+bugs.append(Bug(fixVersion: "10.0"))
+bugs.append(SpecialBug())
+bugs.append(SpecialBug(summary: "summary", steps: ["step1", "step2"], reporter: "reporter", severity: Enums.Severity.low, priority: Enums.Priority.major, status: Enums.Status.inProgress, assignee: "assignee", fixVersion: "1.0", time: 23))
+bugs.append("" as Any)
+
+bugs.map{$0 is SpecialBug ? print("№\(($0 as! SpecialBug).ID) is SpecialBug") : ($0 is Bug ? print("№\(($0 as! Bug).ID) is Bug"): print("Nothing"))}
