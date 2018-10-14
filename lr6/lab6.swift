@@ -1,24 +1,38 @@
 import Foundation
 
-print("Task 1: not ready 1.2")
-extension Int{
-    func evenNumber() -> Bool {
-        return (self % 2 == 0)
+print("Task 1: ")
+
+extension Int {
+    func even() -> Bool {
+        return self%2 == 0
     }
-    subscript(inputInt: Int) -> Int {
-        var counting: Int = 0
-        let arr: Array = Array(String(self))
-        for i in 0..<arr.count {
-            if arr[i] == String.Element(String(inputInt)) {
-            counting += 1
+    
+    func odd() -> Bool {
+        return self%2 == 1
+    }
+    
+    subscript(digit: Int) -> Int {
+        var count = 0
+        var number = self
+        
+        while(number>=1){
+            if(number%10 == digit) {
+                count += 1
             }
+            number = number/10
         }
-        return counting
+        
+        return count
     }
 }
 
-print(142221[2])
-print(142221.evenNumber())
+print(3.even())
+print(3.odd())
+
+print(4.even())
+print(4.odd())
+
+print(113312222[2])
 
 print("Task 2: not ready at all")
 
@@ -44,3 +58,4 @@ protocol IssueStorage {
     mutating func add(_item: Item)
     mutating func remove()-> Item
 }
+
