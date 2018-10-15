@@ -3,26 +3,27 @@ import Foundation
 print("Task 1: ")
 
 extension Int {
-    func isEven() -> Bool {
-        return self%2 == 0
+    func isEvenOrOdd() -> String {
+        return self % 2 == 0 ? "Even" : "Odd"
     }
+
     subscript(digit: Int) -> Int {
         var count = 0
         var number = self
         
-        while(number>=1){
-            if(number%10 == digit) {
+        while(number >= 1){
+            if(number % 10 == digit) {
                 count += 1
             }
-            number = number/10
+            number = number / 10
         }
         
         return count
     }
 }
 
-print(3.isEven() ? "even" : "not even")
-print(4.isEven() ? "even" : "not even")
+print(3.isEvenOrOdd())
+print(4.isEvenOrOdd())
 
 print(113312222[2])
 
@@ -81,7 +82,7 @@ class Bug {
     }
 
     var ID: Int = 0
-    lazy  var summary = String()
+    lazy var summary = String()
     var steps: [String]?
     var reporter: String = ""
     var date: Date
@@ -99,7 +100,7 @@ class Bug {
 
     convenience init(summary: String, steps: [String], reporter: String,
      severity: Enums.Severity, priority: Enums.Priority, status: Enums.Status,
-     assignee: String,  fixVersion: String) {
+     assignee: String, fixVersion: String) {
         self.init()
         self.summary = summary
         self.steps = steps
@@ -135,46 +136,46 @@ class Bug {
         self.assignee = assignee
     }
 
-    subscript(number: Int)-> String{
+    subscript(number: Int) -> String {
         return self.steps![number]
     }
 }
 
-extension Bug{
-    convenience init(steps: [String], reporter: String, dateOpen : Date){
+extension Bug {
+    convenience init(steps: [String], reporter: String, dateOpen: Date) {
         self.init()
         self.steps = steps
         self.reporter = reporter
         self.date = dateOpen
     }
-    func Reopen(){
-        if self.status != Enums.Status.closed
-        {
-            self.setStatus(.reopened)
-            self.date = Date()
-        }
+
+    func Reopen() {
+        self.setStatus(.reopened)
+        self.date = Date()
     }
-    func getTimeFix() -> Int {
-        let dateClosed = self.dateFix ?? Date()
-        var difference = Calendar.current.dateComponents([.day], from: self.date, to: dateClosed)
-        return difference.day ?? 0
+    
+    func getFixingTime() -> Int {
+        if self.status != Enums.Status.closed {
+            let dateClosed = self.dateFix ?? Date()
+            var difference = Calendar.current.dateComponents([.day], from: self.date, to: dateClosed)
+            return difference.day ?? 0
+        }
     }
 }
 
-
 var myDate = Date(timeIntervalSinceReferenceDate: 559790000)
-var Bug1 = Bug(steps: ["1 step", "2 step", "3 step"], reporter: "Found F. F.",dateOpen: myDate)
+var Bug1 = Bug(steps: ["1 step", "2 step", "3 step"], reporter: "Found F. F.", dateOpen: myDate)
 Bug1.dateFix = Date()
-print(Bug1.getTimeFix())
+print(Bug1.getFixingTime())
 
-print("Task 2: not ready 2.4")
+print("Task 2: ")
 
 protocol BugTracker {
     var bugs : [Bug] { get set }
-    func createBug(steps: [String], reporter: String, dateOpen : Date)
-    func setStatusBug( _ status : Enums.Status, _ indexBug : Int)
-    func changeStatusBug( _ status : Enums.Status, _ indexBug : Int)
-    func sortedBug()
+    func createBug(steps: [String], reporter: String, dateOpen: Date)
+    func setBugStatus(_ status: Enums.Status, _ indexBug: Int)
+    func changeBugStatus( _ status: Enums.Status, _ indexBug: Int)
+    func sortBugs()
 }
 
 class JIRA : BugTracker {
@@ -185,41 +186,48 @@ class JIRA : BugTracker {
         self.bugs.append(newBug)
     }
 
-    func setStatusBug( _ status : Enums.Status, _ indexBug : Int) {
+    func setBugStatus(_ status: Enums.Status, _ indexBug: Int) {
         self.bugs[indexBug].status = status
     }
 
-    func changeStatusBug( _ status : Enums.Status, _ indexBug : Int) {
+    func changeBugStatus(_ status: Enums.Status, _ indexBug: Int) {
         self.bugs[indexBug].status = status
     }
 
-    func sortedBug() {
-        self.bugs.sort{
+    func sortBugs() {
+        self.bugs.sort {
             $0.date < $1.date
         }
     }
 }
 
 extension BugTracker {
-    func report( _ indexBug : Int) -> String {
+    func report(_ indexBug : Int) -> String {
         return "\(self.bugs[indexBug].summary) \(self.bugs[indexBug].status) \(self.bugs[indexBug].severity)"
-        }
+    }
 }
+
+var newDate = Date(timeIntervalSinceReferenceDate: 5597911111)
+
+let jiraInstance = JIRA()
+
+jiraInstance.createBug(steps: ["steps"] , reporter: "reporter", dateOpen: newDate)
 
 print("Task 3: ")
 
-
 protocol IssueStorage {
     associatedtype Item
-    subscript(_ index : Int) -> Item { get set }
+    subscript(_ index: Int) -> Item { get set }
     mutating func add(_ item: Item)
-    mutating func removeItem(_ index : Int)
+    mutating func removeItem(_ index: Int)
 }
 
 struct IssueList<T> : IssueStorage {
     typealias Item = T
+
     var items = [T]()
-    subscript(_ index : Int) -> Item {
+
+    subscript(_ index: Int) -> Item {
         get {
             return items[index]
         }
@@ -227,15 +235,18 @@ struct IssueList<T> : IssueStorage {
             items[index] = newValue
         }
     }
+
     mutating func add(_ item: Item) {
         items.append(item)
     }
-    mutating func removeItem(_ index : Int) {
+
+    mutating func removeItem(_ index: Int) {
         items.remove(at: index)
     }
 }
 
 var list = IssueList<Bug>()
+
 list.add(Bug())
 list.add(Bug())
 list.add(Bug())
@@ -244,20 +255,22 @@ list.add(Bug())
 list.removeItem(3)
 
 extension IssueList {
-   var lastIssue: T? {return items.last}
+   var lastIssue: T? { return items.last }
 }
 
 print(list.lastIssue!.ID)
 
 print("Task 4: ")
+
 prefix operator -!
+
 extension Bug {
-    prefix static func -!(bug: inout Bug) -> Bug
-    {
+    prefix static func -!(bug: inout Bug) -> Bug {
         bug.priority = Enums.Priority.minor
         return bug
     }
 }
+
 var bug4: Bug = Bug()
 var bug5: Bug = -!(bug4)
 print(bug4.priority)
