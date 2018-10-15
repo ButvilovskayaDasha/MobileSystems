@@ -3,14 +3,9 @@ import Foundation
 print("Task 1: ")
 
 extension Int {
-    func even() -> Bool {
+    func isEven() -> Bool {
         return self%2 == 0
     }
-    
-    func odd() -> Bool {
-        return self%2 == 1
-    }
-    
     subscript(digit: Int) -> Int {
         var count = 0
         var number = self
@@ -26,36 +21,246 @@ extension Int {
     }
 }
 
-print(3.even())
-print(3.odd())
-
-print(4.even())
-print(4.odd())
+print(3.isEven() ? "even" : "not even")
+print(4.isEven() ? "even" : "not even")
 
 print(113312222[2])
 
-print("Task 2: not ready at all")
-
-print("Task 3: not ready 3.2 and 3.4 and 3.5")
-
-struct IssueList<T> {
-    var items = [T]()
-    mutating func add(_ item: T) {
-        items.append(item)
+class Enums {
+    enum Severity {
+        case high
+        case medium
+        case low
     }
-    mutating func remove()->T {
-        return items.removeLast()
+
+    enum Priority {
+        case critical
+        case major
+        case minor
+        case blocker
+    }
+
+    enum Status {
+        case open
+        case inProgress
+        case resolved
+        case reopened
+        case closed
+    }
+
+    func setDefaultSeverity() -> Severity {
+        return .high
+    }
+
+    func setDefaultPriority() -> Priority {
+        return .critical
+    }
+
+    func setDefaultStatus() -> Status {
+        return .open
+    }
+} 
+
+class Bug {
+    let enums = Enums()
+    var severity: Enums.Severity
+    var priority: Enums.Priority
+    var status: Enums.Status {
+        willSet (newValue) {
+            print("Status: \(self.status) will set instead of \(newValue)")
+        }
+        didSet (oldValue) {
+            print("Status: \(oldValue) did set instead of \(self.status)")
+        }
+    }
+
+    static var nextUid = 0
+    static func generateUid() -> Int {
+        nextUid += 1
+        return nextUid
+    }
+
+    var ID: Int = 0
+    lazy  var summary = String()
+    var steps: [String]?
+    var reporter: String = ""
+    var date: Date
+    var assignee: String = ""
+    var fixVersion: String? = nil
+    var dateFix : Date? = nil
+
+    init() {
+        self.severity = self.enums.setDefaultSeverity()
+        self.priority = self.enums.setDefaultPriority()
+        self.status = self.enums.setDefaultStatus()
+        self.ID = Bug.generateUid()
+        self.date = Date()
+    }
+
+    convenience init(summary: String, steps: [String], reporter: String,
+     severity: Enums.Severity, priority: Enums.Priority, status: Enums.Status,
+     assignee: String,  fixVersion: String) {
+        self.init()
+        self.summary = summary
+        self.steps = steps
+        self.reporter = reporter
+        self.severity = severity
+        self.priority = priority
+        self.status = status
+        self.assignee = assignee
+        self.fixVersion = fixVersion
+    }
+    
+    convenience init?(fixVersion: String?) {
+        self.init()
+        self.fixVersion = fixVersion
+        if(self.fixVersion == "10.0") {
+            return nil
+        }
+    }
+
+    func setSeverity(_ severity: Enums.Severity) {
+        self.severity = severity
+    }
+
+    func setPriority(_ priority: Enums.Priority) {
+        self.priority = priority
+    }
+
+    func setStatus(_ status: Enums.Status) {
+        self.status = status
+    }
+
+    func setAssignee(_ assignee: String) {
+        self.assignee = assignee
+    }
+
+    subscript(number: Int)-> String{
+        return self.steps![number]
     }
 }
+
+extension Bug{
+    convenience init(steps: [String], reporter: String, dateOpen : Date){
+        self.init()
+        self.steps = steps
+        self.reporter = reporter
+        self.date = dateOpen
+    }
+    func Reopen(){
+        if self.status != Enums.Status.closed
+        {
+            self.setStatus(.reopened)
+            self.date = Date()
+        }
+    }
+    func getTimeFix() -> Int {
+        let dateClosed = self.dateFix ?? Date()
+        var difference = Calendar.current.dateComponents([.day], from: self.date, to: dateClosed)
+        return difference.day ?? 0
+    }
+}
+
+
+var myDate = Date(timeIntervalSinceReferenceDate: 559790000)
+var Bug1 = Bug(steps: ["1 step", "2 step", "3 step"], reporter: "Found F. F.",dateOpen: myDate)
+Bug1.dateFix = Date()
+print(Bug1.getTimeFix())
+
+print("Task 2: not ready 2.4")
+
+protocol BugTracker {
+    var bugs : [Bug] { get set }
+    func createBug(steps: [String], reporter: String, dateOpen : Date)
+    func setStatusBug( _ status : Enums.Status, _ indexBug : Int)
+    func changeStatusBug( _ status : Enums.Status, _ indexBug : Int)
+    func sortedBug()
+}
+
+class JIRA : BugTracker {
+    var bugs : [Bug] = []
+
+    func createBug(steps: [String], reporter: String, dateOpen : Date) {
+        let newBug = Bug(steps: steps, reporter: reporter, dateOpen: dateOpen)
+        self.bugs.append(newBug)
+    }
+
+    func setStatusBug( _ status : Enums.Status, _ indexBug : Int) {
+        self.bugs[indexBug].status = status
+    }
+
+    func changeStatusBug( _ status : Enums.Status, _ indexBug : Int) {
+        self.bugs[indexBug].status = status
+    }
+
+    func sortedBug() {
+        self.bugs.sort{
+            $0.date < $1.date
+        }
+    }
+}
+
+extension BugTracker {
+    func report( _ indexBug : Int) -> String {
+        return "\(self.bugs[indexBug].summary) \(self.bugs[indexBug].status) \(self.bugs[indexBug].severity)"
+        }
+}
+
+print("Task 3: ")
+
+
+protocol IssueStorage {
+    associatedtype Item
+    subscript(_ index : Int) -> Item { get set }
+    mutating func add(_ item: Item)
+    mutating func removeItem(_ index : Int)
+}
+
+struct IssueList<T> : IssueStorage {
+    typealias Item = T
+    var items = [T]()
+    subscript(_ index : Int) -> Item {
+        get {
+            return items[index]
+        }
+        set(newValue) {
+            items[index] = newValue
+        }
+    }
+    mutating func add(_ item: Item) {
+        items.append(item)
+    }
+    mutating func removeItem(_ index : Int) {
+        items.remove(at: index)
+    }
+}
+
+var list = IssueList<Bug>()
+list.add(Bug())
+list.add(Bug())
+list.add(Bug())
+list.add(Bug())
+list.add(Bug())
+list.removeItem(3)
 
 extension IssueList {
    var lastIssue: T? {return items.last}
 }
 
-protocol IssueStorage {
-    associatedtype Item
-    var items: Item {get set}
-    mutating func add(_item: Item)
-    mutating func remove()-> Item
+print(list.lastIssue!.ID)
+
+print("Task 4: ")
+prefix operator -!
+extension Bug {
+    prefix static func -!(bug: inout Bug) -> Bug
+    {
+        bug.priority = Enums.Priority.minor
+        return bug
+    }
 }
+var bug4: Bug = Bug()
+var bug5: Bug = -!(bug4)
+print(bug4.priority)
+
+
 
